@@ -71,7 +71,7 @@ public final class TetrisPiece implements Piece {
         //method to make the piece for each rotation type cuz a piece can have 4 diff positions
          private void setup(PieceType type, int rotationIndex, Point[] body) {
             this.type = type;
-            this.rotation = rotation;
+            this.rotation = rotationIndex;
             this.width = type.getBoundingBox().width;
             this.height = type.getBoundingBox().height;
             this.body = body;
