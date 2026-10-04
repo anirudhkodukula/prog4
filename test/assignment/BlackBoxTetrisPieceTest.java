@@ -68,7 +68,7 @@ public class BlackBoxTetrisPieceTest {
         assertBody(r2, 0,1, 1,1, 2,1, 1,0);   
  
         assertEquals(3, r3.getRotationIndex());
-        to the left
+        //to the left
         assertBody(r3, 1,0, 1,1, 1,2, 0,1);   
  
         // Rotating made new pieces; the original is unchanged.
