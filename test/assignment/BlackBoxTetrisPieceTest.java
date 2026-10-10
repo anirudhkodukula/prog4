@@ -1,7 +1,7 @@
 package assignment;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
+import static org.junit.jupiter.api.Assertions.*;
+import java.awt.Point;
 import org.junit.jupiter.api.Test;
 
 import assignment.Piece.PieceType;

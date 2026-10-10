@@ -62,41 +62,41 @@ public final class TetrisPiece implements Piece {
         this.ccwTurn = current;
     }
 
-      private TetrisPiece(PieceType type, int rotationIndex, Point[] body) {
+    private TetrisPiece(PieceType type, int rotationIndex, Point[] body) {
         setup(type, rotationIndex, body);
     }
 
 
 
-        //method to make the piece for each rotation type cuz a piece can have 4 diff positions
-         private void setup(PieceType type, int rotationIndex, Point[] body) {
-            this.type = type;
-            this.rotation = rotationIndex;
-            this.width = type.getBoundingBox().width;
-            this.height = type.getBoundingBox().height;
-            this.body = body;
-            // find the smallest value for every column and u start with a huge number and replace it with something that's smaller
-            skirt = new int[width];
-            for (int x = 0; x < skirt.length; x++) {
-                // need this because it's greater than every possible value
-                skirt[x] = Integer.MAX_VALUE;
-            }
-            for (Point p : body) {
-                if (p.y < skirt[p.x]) {
-                    skirt[p.x] = p.y;
-                }
-            }            
+    //method to make the piece for each rotation type cuz a piece can have 4 diff positions
+        private void setup(PieceType type, int rotationIndex, Point[] body) {
+        this.type = type;
+        this.rotation = rotationIndex;
+        this.width = type.getBoundingBox().width;
+        this.height = type.getBoundingBox().height;
+        this.body = body;
+        // find the smallest value for every column and u start with a huge number and replace it with something that's smaller
+        skirt = new int[width];
+        for (int x = 0; x < skirt.length; x++) {
+            // need this because it's greater than every possible value
+            skirt[x] = Integer.MAX_VALUE;
         }
+        for (Point p : body) {
+            if (p.y < skirt[p.x]) {
+                skirt[p.x] = p.y;
+            }
+        }            
+    }
 
-        // method to help a piece rotate clockwise so it can go from one position to the other 3
-        private static Point[] rotateClockwise(Point[] body, int n) {
-            Point[] rotateBody = new Point[body.length];
-            for (int i = 0; i < body.length; i++) {
-                //x,y maps to y, n -1 - x for nxn box
-                rotateBody[i] = new Point(body[i].y, n - 1 - body[i].x);
-            }
-            return rotateBody;
+    // method to help a piece rotate clockwise so it can go from one position to the other 3
+    private static Point[] rotateClockwise(Point[] body, int n) {
+        Point[] rotateBody = new Point[body.length];
+        for (int i = 0; i < body.length; i++) {
+            //x,y maps to y, n -1 - x for nxn box
+            rotateBody[i] = new Point(body[i].y, n - 1 - body[i].x);
         }
+        return rotateBody;
+    }
 
     @Override
     public PieceType getType() {
