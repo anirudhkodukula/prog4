@@ -29,7 +29,7 @@ public class BlackBoxTetrisBoardTest {
         return rotated;
     }
 
-    // checks that an invalid spawn throws and leaves the board alone
+    // checks that an invalid spawn returns and leaves the board alone
     private void assertNextPieceRejected(Board board, Piece p, Point position) {
         Piece previousPiece = board.getCurrentPiece();
         Point previousPosition = board.getCurrentPiecePosition();
@@ -40,13 +40,8 @@ public class BlackBoxTetrisBoardTest {
             }
         }
 
-        // invalid spawns should throw so the game knows when a new piece cannot fit
-        try {
-            board.nextPiece(p, position);
-            fail("Invalid spawn should throw IllegalArgumentException");
-        } catch (IllegalArgumentException expected) {
-            // still check that rejecting it did not change anything
-        }
+        // if this throws an exception, the test fails
+        board.nextPiece(p, position);
         assertEquals(previousPiece, board.getCurrentPiece());
         assertEquals(previousPosition, board.getCurrentPiecePosition());
         for (int x = 0; x < board.getWidth(); x++) {

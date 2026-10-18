@@ -73,7 +73,11 @@ public final class TetrisPiece implements Piece {
         this.rotation = rotationIndex;
         this.width = type.getBoundingBox().width;
         this.height = type.getBoundingBox().height;
-        this.body = body;
+        // copy the points too cuz copying just the array would still share them
+        this.body = new Point[body.length];
+        for (int i = 0; i < body.length; i++) {
+            this.body[i] = new Point(body[i]);
+        }
         // find the smallest value for every column and u start with a huge number and replace it with something that's smaller
         skirt = new int[width];
         for (int x = 0; x < skirt.length; x++) {
@@ -129,12 +133,22 @@ public final class TetrisPiece implements Piece {
 
     @Override
     public Point[] getBody() {
-        return body;
+        // give callers their own points so they cannot change the og shape
+        Point[] bodyCopy = new Point[body.length];
+        for (int i = 0; i < body.length; i++) {
+            bodyCopy[i] = new Point(body[i]);
+        }
+        return bodyCopy;
     }
 
     @Override
     public int[] getSkirt() {
-        return skirt;
+        // changes to this copy will not affect the piece's skirt
+        int[] skirtCopy = new int[skirt.length];
+        for (int i = 0; i < skirt.length; i++) {
+            skirtCopy[i] = skirt[i];
+        }
+        return skirtCopy;
     }
 
     @Override

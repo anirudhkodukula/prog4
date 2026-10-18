@@ -183,5 +183,47 @@ public class BlackBoxTetrisPieceTest {
         assertBody(z, 1,2, 1,1, 0,1, 0,0);
     }
 
+    @Test
+    void returnedArraysCannotChangeAnyPieceRotation() {
+        for (PieceType type : PieceType.values()) {
+            Piece piece = new TetrisPiece(type);
+            for (int rotation = 0; rotation < 4; rotation++) {
+                Point[] expectedBody = piece.getBody();
+                int[] expectedSkirt = piece.getSkirt();
+                Point[] changedBody = piece.getBody();
+                int[] changedSkirt = piece.getSkirt();
+
+                // try changing a point and replacing one, both should leave the piece alone
+                changedBody[0].x = -100;
+                changedBody[0].y = -100;
+                changedBody[1] = new Point(100, 100);
+                changedSkirt[0] = -100;
+
+                assertArrayEquals(expectedBody, piece.getBody());
+                assertArrayEquals(expectedSkirt, piece.getSkirt());
+                piece = piece.clockwisePiece();
+            }
+        }
+    }
+
+    @Test
+    void pieceDoesNotShareSpawnBodyPoints() {
+        PieceType type = PieceType.T;
+        Point[] spawnBody = type.getSpawnBody();
+        Point savedPoint = new Point(spawnBody[0]);
+        Piece piece = new TetrisPiece(type);
+        Point[] expectedBody = piece.getBody();
+        int[] expectedSkirt = piece.getSkirt();
+        try {
+            // changing the supplied spawn data should not change a piece we already made
+            spawnBody[0].x = 100;
+            spawnBody[0].y = 100;
+            assertArrayEquals(expectedBody, piece.getBody());
+            assertArrayEquals(expectedSkirt, piece.getSkirt());
+        } finally {
+            spawnBody[0].setLocation(savedPoint);
+        }
+    }
+
 }
 

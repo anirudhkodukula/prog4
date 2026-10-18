@@ -235,12 +235,19 @@ public class JTetris extends JComponent {
     public void addNewPiece() {
         count++;
         Piece nextPiece = pickNextPiece();
-        try {
-            board.nextPiece(nextPiece, new Point(board.getWidth() / 2 - nextPiece.getWidth() / 2, HEIGHT));
-        } catch(IllegalArgumentException ex) {
-            stopGame();
-            return;
+        Point spawn = new Point(board.getWidth() / 2 - nextPiece.getWidth() / 2, HEIGHT);
+        // check the spawn here cuz the board reports invalid inputs without throwing
+        for (Point block : nextPiece.getBody()) {
+            int x = spawn.x + block.x;
+            int y = spawn.y + block.y;
+            if (x < 0 || x >= board.getWidth() || y < 0 || y >= board.getHeight()
+                    || board.getGrid(x, y) != null) {
+                System.err.println("New piece cannot spawn");
+                stopGame();
+                return;
+            }
         }
+        board.nextPiece(nextPiece, spawn);
         countLabel.setText(Integer.toString(count));
     }
 
