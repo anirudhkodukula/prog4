@@ -150,14 +150,12 @@ public final class TetrisBoard implements Board {
     public void nextPiece(Piece p, Point spawnPosition) {
         // check that the piece and spawn position are not null
         if (p == null || p.getType() == null || spawnPosition == null) {
-            System.err.println("Piece, piece type, and spawn position cannot be null");
-            return;
+            throw new IllegalArgumentException("Piece, piece type, and spawn position cannot be null");
         }
 
         // check that every block fits in the board and does not overlap with an already placed piece
         if (!canPlace(p, spawnPosition)) {
-            System.err.println("Piece either doesn't fit on the board or overlaps with another piece");
-            return;
+            throw new IllegalArgumentException("Piece either doesn't fit on the board or overlaps with another piece");
         }
 
         // set the current piece and copy its spawn position
