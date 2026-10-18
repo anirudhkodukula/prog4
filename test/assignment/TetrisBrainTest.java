@@ -9,10 +9,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.api.Test;
 
-/** Behavioral tests use only public board operations, not the brain's score formula. */
+// checks what the brain actually does using the board's public methods
 @Timeout(value = 30, unit = TimeUnit.SECONDS)
 public class TetrisBrainTest {
     @Test
+    // no falling piece yet, so the brain should just do nothing
     void noActivePieceNeedsNoAction() {
         Board board = new TetrisBoard(10, 24);
         Brain brain = new TetrisBrain();
@@ -21,12 +22,14 @@ public class TetrisBrainTest {
     }
 
     @Test
+    // save the board first so we can make sure thinking about a move leaves it alone
     void decisionDoesNotChangeInputBoard() {
         Board board = new TetrisBoard(10, 24);
         Piece activePiece = new TetrisPiece(Piece.PieceType.T);
         Point startingPosition = new Point(3, 20);
         board.nextPiece(activePiece, startingPosition);
         board.move(Board.Action.LEFT);
+        // NOTHING gives us a copy without moving the piece
         Board snapshot = board.testMove(Board.Action.NOTHING);
         Board.Action previousAction = board.getLastAction();
         Board.Result previousResult = board.getLastResult();
@@ -40,6 +43,7 @@ public class TetrisBrainTest {
     }
 
     @Test
+    // the stick starts vertical and needs to turn sideways to clear this tiny board
     void rotatesStickToClearNarrowBoard() {
         Board board = new TetrisBoard(4, 8);
         Piece stick = new TetrisPiece(Piece.PieceType.STICK);
@@ -60,6 +64,7 @@ public class TetrisBrainTest {
     }
 
     @Test
+    // use the same seeds each time so we can compare how long the brain lasts
     void survivesOneHundredPiecesOnAverageAcrossFiveRuns() {
         int totalPlaced = 0;
         for (int seed = 0; seed < 5; seed++) {
@@ -73,6 +78,7 @@ public class TetrisBrainTest {
     }
 
     @Test
+    // even with no piece, the brain should leave the last action and result alone
     void emptyBoardDecisionPreservesMetadata() {
         Board board = new TetrisBoard(10, 24);
         board.move(Board.Action.LEFT);
@@ -82,6 +88,7 @@ public class TetrisBrainTest {
 
     @ParameterizedTest
     @EnumSource(Piece.PieceType.class)
+    // try every piece near both walls, in the middle, and at diff heights
     void handlesEveryPieceRotationAtWallsAndDifferentHeights(Piece.PieceType type) {
         Brain brain = new TetrisBrain();
         for (int rotation = 0; rotation < 4; rotation++) {
@@ -89,6 +96,7 @@ public class TetrisBrainTest {
             int minX = minimumX(piece);
             int maxX = maximumX(piece);
             int minY = minimumY(piece);
+            // use the actual blocks to reach the walls and floor, cuz the box can have empty space
             int leftOrigin = -minX;
             int rightOrigin = 9 - maxX;
             int floorOrigin = -minY;
@@ -103,8 +111,7 @@ public class TetrisBrainTest {
                     assertDecisionPreservesBoard(brain, board);
                     placeWithBrain(brain, board);
                     assertEquals(4, occupiedCells(board), "One tetromino contributes four cells");
-                    // S and Z pieces necessarily leave one hole when placed alone
-                    // on a flat floor, regardless of their orientation.
+                    // the dog pieces leave one hole on a flat floor no matter how we turn them
                     int expectedHoles = 0;
                     if (type == Piece.PieceType.LEFT_DOG) {
                         expectedHoles = 1;
@@ -132,6 +139,7 @@ public class TetrisBrainTest {
     }
 
     @Test
+    // fill everything except column 8 so the stick has to turn and move into that gap
     void rotatesAndMovesToClearFourRows() {
         Board board = new TetrisBoard(10, 24);
         Piece verticalStick = rotated(Piece.PieceType.STICK, 1);
@@ -150,6 +158,7 @@ public class TetrisBrainTest {
     }
 
     @Test
+    // put a square in the way and make sure the stick stays on the open floor
     void avoidsPlacingAcrossAnEdgeThatWouldCreateHoles() {
         Board board = new TetrisBoard(10, 24);
         Piece squareFixture = new TetrisPiece(Piece.PieceType.SQUARE);
@@ -165,6 +174,7 @@ public class TetrisBrainTest {
     }
 
     @Test
+    // the right side is lower, so putting the square there should clear two rows
     void choosesLowerSideOfUnevenStack() {
         Board board = new TetrisBoard(6, 24);
         Piece square = new TetrisPiece(Piece.PieceType.SQUARE);
@@ -181,6 +191,7 @@ public class TetrisBrainTest {
     }
 
     @Test
+    // build a tall stack so the brain still has to pick a move even when the options are bad
     void finishesEvenWhenEveryAvailablePlacementIsHigh() {
         Board board = new TetrisBoard(4, 40);
         Piece square = new TetrisPiece(Piece.PieceType.SQUARE);
@@ -196,6 +207,7 @@ public class TetrisBrainTest {
     }
 
     @Test
+    // the square already fills the width, so there is no reason to move around first
     void dropsImmediatelyWhenNoLateralMoveOrRotationCanImprovePlacement() {
         Board board = new TetrisBoard(2, 8);
         Piece activePiece = new TetrisPiece(Piece.PieceType.SQUARE);
@@ -207,6 +219,7 @@ public class TetrisBrainTest {
     }
 
     @Test
+    // clear a row first so we can check that the brain leaves that info alone too
     void preservesNonemptyBoardAndPreviousLineClearMetadata() {
         Board board = new TetrisBoard(4, 12);
         Piece squareFixture = new TetrisPiece(Piece.PieceType.SQUARE);
@@ -222,6 +235,7 @@ public class TetrisBrainTest {
     }
 
     @Test
+    // make an overhang with holes underneath and check that the brain can still place a piece
     void handlesBoardWithExistingBuriedHoles() {
         Board board = new TetrisBoard(10, 24);
         Piece verticalStick = rotated(Piece.PieceType.STICK, 1);
@@ -238,6 +252,7 @@ public class TetrisBrainTest {
     }
 
     @Test
+    // nothing left to move after the clear, but the clear count should still stay the same
     void noActivePieceAfterLineClearPreservesClearCount() {
         Board board = new TetrisBoard(4, 8);
         Piece stickFixture = new TetrisPiece(Piece.PieceType.STICK);
@@ -250,6 +265,7 @@ public class TetrisBrainTest {
     }
 
     @Test
+    // use the same brain on another board, then check that its original decision stays the same
     void sameBrainCanHandleDifferentBoardsWithoutLeakingState() {
         Brain shared = new TetrisBrain();
         Board first = new TetrisBoard(10, 24);
@@ -272,6 +288,7 @@ public class TetrisBrainTest {
     }
 
     @Test
+    // try more seeds so a few lucky games do not carry the average
     void survivesBroaderSetOfRandomSequences() {
         int totalPlaced = 0;
         int minimum = Integer.MAX_VALUE;
@@ -289,6 +306,7 @@ public class TetrisBrainTest {
         assertTrue(average >= 100, "Average must reach 100 across additional seeds");
     }
 
+    // leave a square sized gap on either side and check that the brain heads toward it
     private void assertSquareFillsGap(int gapX) {
         Board board = new TetrisBoard(10, 24);
         Piece square = new TetrisPiece(Piece.PieceType.SQUARE);
@@ -311,8 +329,7 @@ public class TetrisBrainTest {
         assertEquals(0, occupiedCells(board));
     }
 
-    // Install fixtures by aligning actual blocks, rather than assuming the SRS origin
-    // is the lowest occupied cell. All fixtures are constructed through public methods.
+    // line up the actual blocks cuz the piece origin is not always its bottom left block
     private void placeFixture(Board board, Piece piece, int left, int bottom) {
         int originX = left - minimumX(piece);
         int originY = bottom - minimumY(piece);
@@ -324,6 +341,7 @@ public class TetrisBrainTest {
         assertEquals(Board.Result.PLACE, result);
     }
 
+    // turn the piece clockwise the requested number of times
     private Piece rotated(Piece.PieceType type, int turns) {
         Piece piece = new TetrisPiece(type);
         for (int turn = 0; turn < turns; turn++) {
@@ -332,6 +350,7 @@ public class TetrisBrainTest {
         return piece;
     }
 
+    // find the leftmost block inside the piece
     private int minimumX(Piece piece) {
         int result = Integer.MAX_VALUE;
         for (Point block : piece.getBody()) {
@@ -342,6 +361,7 @@ public class TetrisBrainTest {
         return result;
     }
 
+    // same idea but for the rightmost block
     private int maximumX(Piece piece) {
         int result = Integer.MIN_VALUE;
         for (Point block : piece.getBody()) {
@@ -352,6 +372,7 @@ public class TetrisBrainTest {
         return result;
     }
 
+    // find the lowest block so we can line it up with the floor
     private int minimumY(Piece piece) {
         int result = Integer.MAX_VALUE;
         for (Point block : piece.getBody()) {
@@ -362,6 +383,7 @@ public class TetrisBrainTest {
         return result;
     }
 
+    // count placed blocks, the falling piece is not part of the grid yet
     private int occupiedCells(Board board) {
         int count = 0;
         for (int x = 0; x < board.getWidth(); x++) {
@@ -374,6 +396,7 @@ public class TetrisBrainTest {
         return count;
     }
 
+    // scan down each column, any empty cell below a block counts as a hole
     private int countHoles(Board board) {
         int holes = 0;
         for (int x = 0; x < board.getWidth(); x++) {
@@ -389,6 +412,7 @@ public class TetrisBrainTest {
         return holes;
     }
 
+    // keep copies of the board and piece data so we can catch changes from nextMove
     private void assertDecisionPreservesBoard(Brain brain, Board board) {
         Board snapshot = board.testMove(Board.Action.NOTHING);
         Board.Action previousAction = board.getLastAction();
@@ -398,6 +422,7 @@ public class TetrisBrainTest {
         Point[] body = null;
         int[] skirt = null;
         if (piece != null) {
+            // copy each point too so changing the og points cannot change our saved version
             Point[] originalBody = piece.getBody();
             body = new Point[originalBody.length];
             for (int i = 0; i < body.length; i++) {
@@ -431,11 +456,12 @@ public class TetrisBrainTest {
             assertArrayEquals(body, piece.getBody());
             assertArrayEquals(skirt, piece.getSkirt());
         }
+        // asking again from the same spot should give us the same move
         Board.Action repeatedDecision = brain.nextMove(board);
         assertEquals(decision, repeatedDecision, "Same position should give same decision");
     }
 
-    // Exercise actual decisions until placement, rather than checking only the first action.
+    // keep asking for moves until the piece lands, with a cap so a stuck brain fails
     private void placeWithBrain(Brain brain, Board board) {
         int before = occupiedCells(board);
         for (int step = 0; step < 100; step++) {
@@ -448,6 +474,7 @@ public class TetrisBrainTest {
             assertNotEquals(Board.Action.NOTHING, action, "Active piece must make progress");
             assertNotEquals(Board.Action.HOLD, action);
             Board.Result result = board.move(action);
+            // a move should either go through or finish placing the piece
             boolean validResult = false;
             if (result == Board.Result.SUCCESS) {
                 validResult = true;
@@ -459,6 +486,7 @@ public class TetrisBrainTest {
         }
         assertNull(board.getCurrentPiece(), "Brain must place within 100 actions");
         assertEquals(Board.Result.PLACE, board.getLastResult());
+        // each piece adds four blocks, then full rows take some back out
         int cellsAdded = 4;
         int cellsCleared = board.getRowsCleared() * board.getWidth();
         int expectedCells = before + cellsAdded - cellsCleared;
@@ -467,6 +495,7 @@ public class TetrisBrainTest {
                 "Placement and clears must conserve occupied cells");
     }
 
+    // play a repeatable random game and stop when the spawn is blocked or the stack gets too high
     private int play(int seed, int limit) {
         Random random = new Random(seed);
         Brain brain = new TetrisBrain();
@@ -479,6 +508,7 @@ public class TetrisBrainTest {
             Piece piece = new TetrisPiece(type);
             int spawnX = 5 - piece.getWidth() / 2;
             Point spawn = new Point(spawnX, 20);
+            // if any spawn block overlaps the stack, this game is done
             for (Point block : piece.getBody()) {
                 int blockX = spawn.x + block.x;
                 int blockY = spawn.y + block.y;
@@ -490,6 +520,7 @@ public class TetrisBrainTest {
             board.nextPiece(piece, spawn);
             assertNotNull(board.getCurrentPiece(), "Spawn should succeed after collision check");
             placeWithBrain(brain, board);
+            // rows above the normal play area mean the stack got too high
             if (board.getMaxHeight() > 20) {
                 return placed;
             }

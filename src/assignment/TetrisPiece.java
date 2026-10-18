@@ -34,7 +34,6 @@ public final class TetrisPiece implements Piece {
      * the runner code and testing code.
      */
     public TetrisPiece(PieceType type) {
-        // TODO: Implement me.
         if (type == null){
             System.err.println("the type can't be null");
             body = new Point[0];
@@ -100,49 +99,41 @@ public final class TetrisPiece implements Piece {
 
     @Override
     public PieceType getType() {
-        // TODO: Implement me.
         return type;
     }
 
     @Override
     public int getRotationIndex() {
-        // TODO: Implement me.
         return rotation;
     }
 
     @Override
     public Piece clockwisePiece() {
-        // TODO: Implement me.
         return cwTurn;
     }
 
     @Override
     public Piece counterclockwisePiece() {
-        // TODO: Implement me.
         return ccwTurn;
     }
 
     @Override
     public int getWidth() {
-        // TODO: Implement me.
         return width;
     }
 
     @Override
     public int getHeight() {
-        // TODO: Implement me.
         return height;
     }
 
     @Override
     public Point[] getBody() {
-        // TODO: Implement me.
         return body;
     }
 
     @Override
     public int[] getSkirt() {
-        // TODO: Implement me.
         return skirt;
     }
 
@@ -152,7 +143,6 @@ public final class TetrisPiece implements Piece {
         if(!(other instanceof TetrisPiece)) return false;
         TetrisPiece otherPiece = (TetrisPiece) other;
 
-        // TODO: Implement me.
         return type == otherPiece.type && rotation == otherPiece.rotation;
     }
 }
